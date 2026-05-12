@@ -9,7 +9,7 @@ AI-BTC-Trader is a full-stack application that:
 - **Analyzes sentiment** using FinBERT (a financial domain-specific BERT model) to understand market sentiment
 - **Generates trading signals** based on sentiment trends and market conditions
 - **Provides a real-time dashboard** to visualize price, sentiment, and trading signals
-- **Exposes an MCP server** for AI agent integration and extensibility (in development)
+- **Exposes an MCP server** for AI agent integration and extensibility (currently in development)
 
 ## Tech Stack
 
@@ -247,11 +247,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 For issues, questions, or suggestions, please [open an issue](https://github.com/YOUR_USERNAME/AI-BTC-Trader/issues) on GitHub.
 
 ## Roadmap
--MCP Server Integration
--Frontend Component Changes
--Deployment
+
+1) MCP Server Integration
+2) Frontend Component Changes
+3) Deployment
 
 
 
 ---
-
