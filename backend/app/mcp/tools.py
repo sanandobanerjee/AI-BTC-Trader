@@ -68,7 +68,7 @@ async def _handle_get_current_signal(db)-> list[TextContent]:
     signal_repo=SignalRepository(db)
     signal_service=SignalService(
         sentiment_repository=sentiment_repo,
-        signal_repository=sentiment_repo
+        signal_repository=signal_repo
     )
     signal = await signal_service.get_latest()
 
