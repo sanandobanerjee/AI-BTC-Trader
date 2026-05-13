@@ -73,7 +73,7 @@ function PriceChart({priceHistory,currentPrice}){
           <Line
             type="monotone"
             dataKey="price"
-            stroke="#000090"
+            stroke="#f7931a"
             strokeWidth={2}
             dot={false}
             activeDot={{ r: 4 }}/>
