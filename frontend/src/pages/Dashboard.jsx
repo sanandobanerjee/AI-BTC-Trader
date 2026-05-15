@@ -1,3 +1,4 @@
+import { useState, useRef } from "react"
 import { useSignal } from "../hooks/useSignal"
 import { useSentiment } from "../hooks/useSentiment"
 import SignalBadge from "../components/SignalBadge"
@@ -31,23 +32,53 @@ function StatCard({ label, value, sub }) {
 
 function Dashboard() {
   const {
-    signal,
-    price,
-    priceHistory,
-    loading: signalLoading,
-    error: signalError,
-    lastUpdated,
-    triggerPipeline,
+    signal,price,priceHistory,loading: signalLoading,error: signalError,lastUpdated,triggerPipeline,
   } = useSignal()
 
-  const {
-    feed,
-    loading: sentimentLoading,
-    error: sentimentError,
-  } = useSentiment(20)
+  const { feed, loading: sentimentLoading, error: sentimentError } = useSentiment(20)
 
-  const isLoading = signalLoading || sentimentLoading
+  const [aiText, setAiText]       = useState("")
+  const [aiLoading, setAiLoading] = useState(false)
+  const [aiError, setAiError]     = useState("")
+  const abortRef                  = useRef(null)
+
+  const isLoading    = signalLoading || sentimentLoading
   const errorMessage = signalError || sentimentError
+
+  async function handleExplain() {
+    setAiText("")
+    setAiError("")
+    setAiLoading(true)
+
+    abortRef.current = new AbortController()
+
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL || "http://localhost:8000"}/ai/explain`,
+        { signal: abortRef.current.signal }
+      )
+      if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.detail || "Failed to fetch analysis")
+      }
+      const reader  = res.body.getReader()
+      const decoder = new TextDecoder()
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        setAiText(prev => prev + decoder.decode(value, { stream: true }))
+      }
+    } catch (err) {
+      if (err.name !== "AbortError") setAiError(err.message)
+    } finally {
+      setAiLoading(false)
+    }
+  }
+
+  function handleAbort() {
+    abortRef.current?.abort()
+    setAiLoading(false)
+  }
 
   function formatMarketCap(value) {
     if (!value) return "-"
@@ -69,7 +100,7 @@ function Dashboard() {
       <header className="dashboard__header">
         <div className="dashboard__title-group">
           <h1 className="dashboard__title">
-            <span className="dashboard__title-btc">₿</span> BTC Sentiment Trader
+            <span className="dashboard__title-btc">₿</span> SATURN
           </h1>
           <p className="dashboard__subtitle">
             AI-powered signals from {feed.length} scored headlines
@@ -92,10 +123,7 @@ function Dashboard() {
       <section className="dashboard__signal-row">
         <div className="dashboard__signal-main">
           <h2 className="dashboard__section-title">Current Signal</h2>
-          <SignalBadge
-            signal={signal?.signal}
-            confidence={signal?.confidence}
-          />
+          <SignalBadge signal={signal?.signal} confidence={signal?.confidence} />
         </div>
         <div className="dashboard__gauge">
           <h2 className="dashboard__section-title">Market Sentiment</h2>
@@ -119,14 +147,8 @@ function Dashboard() {
               : null
           }
         />
-        <StatCard
-          label="Market Cap"
-          value={formatMarketCap(price?.market_cap_usd)}
-        />
-        <StatCard
-          label="Volume (24h)"
-          value={formatVolume(price?.volume_24h_usd)}
-        />
+        <StatCard label="Market Cap"   value={formatMarketCap(price?.market_cap_usd)} />
+        <StatCard label="Volume (24h)" value={formatVolume(price?.volume_24h_usd)} />
         <StatCard
           label="Avg Sentiment"
           value={
@@ -140,18 +162,39 @@ function Dashboard() {
 
       <section className="dashboard__chart-section">
         <h2 className="dashboard__section-title">Price History</h2>
-        <PriceChart
-          priceHistory={priceHistory}
-          currentPrice={price}
-        />
+        <PriceChart priceHistory={priceHistory} currentPrice={price} />
       </section>
 
       <section className="dashboard__feed-section">
         <h2 className="dashboard__section-title">Sentiment Feed</h2>
-        <FeedList
-          feed={feed}
-          loading={sentimentLoading}
-        />
+        <FeedList feed={feed} loading={sentimentLoading} />
+      </section>
+
+      <section className="dashboard__ai-section">
+        <div className="dashboard__ai-header">
+          <h2 className="dashboard__section-title">Saturn-AI Signal Analysis</h2>
+          <button
+            className="dashboard__ai-btn"
+            onClick={aiLoading ? handleAbort : handleExplain}
+            disabled={!signal}
+          >
+            {aiLoading ? "⏹ Stop" : "✦ Ask Saturn-AI"}
+          </button>
+        </div>
+        {aiError && <div className="dashboard__error">{aiError}</div>}
+        {(aiText || aiLoading) && (
+          <div className="dashboard__ai-output">
+            <p className="dashboard__ai-text">
+              {aiText}
+              {aiLoading && <span className="dashboard__ai-cursor" />}
+            </p>
+          </div>
+        )}
+        {!aiText && !aiLoading && !aiError && (
+          <p className="dashboard__ai-placeholder">
+            Click "Ask Saturn-AI" to get a comprehensive breakdown of the current signal.
+          </p>
+        )}
       </section>
 
     </div>
