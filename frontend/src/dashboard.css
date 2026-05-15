@@ -176,3 +176,75 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+/* ── AI Section ──────────────────────────────────── */
+.dashboard__ai-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dashboard__ai-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dashboard__ai-btn {
+  background: #4d4d4d;
+  color: #e6e6e6;
+  border: 1px solid #808080;
+  border-radius: 6px;
+  padding: 8px 18px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.dashboard__ai-btn:hover:not(:disabled) {
+  background: #808080;
+  color: #1a1a1a;
+  border-color: #e6e6e6;
+}
+
+.dashboard__ai-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.dashboard__ai-output {
+  background: #4d4d4d;
+  border: 1px solid #808080;
+  border-left: 3px solid #e6e6e6;
+  border-radius: 8px;
+  padding: 16px 20px;
+}
+
+.dashboard__ai-text {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #e6e6e6;
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+
+.dashboard__ai-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  background: #e6e6e6;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  animation: blink 0.8s step-end infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+.dashboard__ai-placeholder {
+  font-size: 0.85rem;
+  color: #808080;
+  padding: 12px 0;
+}
