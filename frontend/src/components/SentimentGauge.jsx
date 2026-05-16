@@ -12,7 +12,7 @@ function SentimentGauge({positiveCount,negativeCount,neutralCount,sampleSize}) {
     const neutralPct=((neutralCount/sampleSize)*100).toFixed(1)
 
     const dominantLabel=
-    positiveCount>=negativeCount&& positiveCount>=negativeCount?"Bullish":
+    positiveCount>=negativeCount&& positiveCount>=neutralCount?"Bullish":
     negativeCount >= positiveCount && negativeCount >= neutralCount?"Bearish"
       :"Neutral"  //positive beats negative on tie d/t conservative bias
 

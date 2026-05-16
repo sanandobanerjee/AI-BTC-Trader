@@ -12,7 +12,7 @@ function SignalBadge({signal,confidence}){
     const confidencePct=((confidence??0)*100).toFixed(1)
 
     return(
-        <div className={'signal-badge ${className}'}>
+        <div className={`signal-badge ${className}`}>
             <span className="signal-badge__icon">{icon} </span>
             <span className="signal-badge__label">{label} </span>
             <span className="signal-badge__confidence">
