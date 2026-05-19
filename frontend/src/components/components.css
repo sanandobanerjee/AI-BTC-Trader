@@ -1,143 +1,207 @@
 /* ── SignalBadge ─────────────────────────────────── */
 .signal-badge {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 10px;
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.signal-badge::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.06;
+  pointer-events: none;
+}
+
+.signal-badge--buy   { border-color: var(--buy); }
+.signal-badge--buy::before   { background: var(--buy); }
+.signal-badge--sell  { border-color: var(--sell); }
+.signal-badge--sell::before  { background: var(--sell); }
+.signal-badge--hold  { border-color: var(--hold); }
+.signal-badge--hold::before  { background: var(--hold); }
+.signal-badge--empty { border-color: var(--border); }
+
+.signal-badge__eyebrow {
+  font-size: 10px;
+  font-family: var(--mono);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--text-muted);
+  display: block;
+}
+
+.signal-badge__label {
+  font-family: var(--heading);
+  font-size: 42px;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  display: block;
+}
+
+.signal-badge--buy  .signal-badge__label { color: var(--buy); }
+.signal-badge--sell .signal-badge__label { color: var(--sell); }
+.signal-badge--hold .signal-badge__label { color: var(--hold); }
+.signal-badge--empty .signal-badge__label { color: var(--text-muted); font-size: 18px; }
+
+.signal-badge__confidence {
+  font-size: 12px;
+  font-family: var(--mono);
+  color: var(--text-muted);
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 4px 12px;
+  display: block;
+}
+
+.signal-badge__icon { display: none; }
+
+/* ── SentimentGauge -- */
+.sentiment-gauge {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.sentiment-gauge__label {
+  font-family: var(--heading);
+  font-size: 28px;
+  letter-spacing: 0.02em;
+  margin-bottom: 14px;
+  line-height: 1;
+}
+
+.sentiment-gauge--bullish .sentiment-gauge__label { color: var(--buy); }
+.sentiment-gauge--bearish .sentiment-gauge__label { color: var(--sell); }
+.sentiment-gauge--neutral .sentiment-gauge__label { color: var(--hold); }
+
+.sentiment-gauge__bar {
+  display: flex;
+  height: 10px;
+  border-radius: 5px;
+  overflow: hidden;
+  margin-bottom: 18px;
+  background: var(--bg-primary);
+  gap: 2px;
+}
+
+.sentiment-gauge__segment--positive { background: var(--buy);  border-radius: 5px 0 0 5px; }
+.sentiment-gauge__segment--neutral  { background: var(--hold); }
+.sentiment-gauge__segment--negative { background: var(--sell); border-radius: 0 5px 5px 0; }
+
+.sentiment-gauge__stats {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  flex: 1;
+}
+
+.sentiment-gauge__stat {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sentiment-gauge__stat-left {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 16px 24px;
-  border-radius: 8px;
-  font-weight: 700;
-  font-size: 1.4rem;
-  background: #4d4d4d;
-  border: 2px solid #808080;
 }
-.signal-badge--buy  { border-color: #22c55e; color: #22c55e; }
-.signal-badge--sell { border-color: #ef4444; color: #ef4444; }
-.signal-badge--hold { border-color: #f59e0b; color: #f59e0b; }
-.signal-badge--empty { color: #808080; font-size: 1rem; font-weight: 400; }
-.signal-badge__confidence { font-size: 0.85rem; font-weight: 400; opacity: 0.75; }
 
-/* ── SentimentGauge ──────────────────────────────── */
-.sentiment-gauge { background: #4d4d4d; border-radius: 8px; padding: 16px; }
-.sentiment-gauge__label { font-size: 1.1rem; font-weight: 700; margin-bottom: 10px; }
-.sentiment-gauge--bullish .sentiment-gauge__label { color: #22c55e; }
-.sentiment-gauge--bearish .sentiment-gauge__label { color: #ef4444; }
-.sentiment-gauge--neutral .sentiment-gauge__label { color: #f59e0b; }
-.sentiment-gauge__bar {
-  display: flex;
-  height: 12px;
-  border-radius: 6px;
-  overflow: hidden;
-  margin-bottom: 10px;
-  background: #1a1a1a;
+.sentiment-gauge__stat-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
-.sentiment-gauge__segment--positive { background: #22c55e; }
-.sentiment-gauge__segment--neutral  { background: #f59e0b; }
-.sentiment-gauge__segment--negative { background: #ef4444; }
-.sentiment-gauge__stats { display: flex; gap: 16px; font-size: 0.8rem; margin-bottom: 6px; }
-.sentiment-gauge__stat--positive { color: #22c55e; }
-.sentiment-gauge__stat--neutral  { color: #f59e0b; }
-.sentiment-gauge__stat--negative { color: #ef4444; }
-.sentiment-gauge__sample { font-size: 0.75rem; color: #b3b3b3; }
 
-/* ── PriceChart ──────────────────────────────────── */
-.price-chart { background: #4d4d4d; border-radius: 8px; padding: 16px; }
-.price-chart__current { display: flex; align-items: baseline; gap: 12px; margin-bottom: 12px; }
-.price-chart__price { font-size: 1.6rem; font-weight: 700; color: #f7931a; }
-.price-chart__change { font-size: 0.9rem; }
-.price-chart__change--positive { color: #22c55e; }
-.price-chart__change--negative { color: #ef4444; }
-.price-chart--empty { color: #808080; padding: 24px; text-align: center; }
+.sentiment-gauge__stat--positive .sentiment-gauge__stat-dot { background: var(--buy); }
+.sentiment-gauge__stat--neutral  .sentiment-gauge__stat-dot { background: var(--hold); }
+.sentiment-gauge__stat--negative .sentiment-gauge__stat-dot { background: var(--sell); }
 
-/* ── FeedList ────────────────────────────────────── */
+.sentiment-gauge__stat-name {
+  color: var(--text-muted);
+  font-family: var(--mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.sentiment-gauge__stat-val {
+  font-family: var(--mono);
+  font-size: 26px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.sentiment-gauge__stat--positive .sentiment-gauge__stat-val { color: var(--buy); }
+.sentiment-gauge__stat--negative .sentiment-gauge__stat-val { color: var(--sell); }
+.sentiment-gauge__stat--neutral  .sentiment-gauge__stat-val { color: var(--hold); }
+
+.sentiment-gauge__sample {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-family: var(--mono);
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.sentiment-gauge--empty {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-family: var(--mono);
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── FeedList — clear card demarcation ───────────── */
 .feed-list {
   list-style: none;
-  padding: 0;
+  padding: 8px;
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  max-height: 480px;
+  gap: 6px;
+  flex: 1;
   overflow-y: auto;
-  padding-right: 4px;
-}
-
-.feed-list::-webkit-scrollbar {
-  width: 4px;
-}
-.feed-list::-webkit-scrollbar-track {
-  background: #1a1a1a;
-}
-.feed-list::-webkit-scrollbar-thumb {
-  background: #4d4d4d;
-  border-radius: 4px;
+  min-height: 0;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 8px 8px;
 }
 
 .feed-item {
-  background: #4d4d4d;
-  border-radius: 8px;
-  padding: 14px 16px;
-  border-left: 3px solid #808080;
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 12px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
+  cursor: pointer;
+  transition: border-color 0.2s;
 }
 
-.feed-item__header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
+.feed-item--positive { border-left-color: var(--buy); }
+.feed-item--negative { border-left-color: var(--sell); }
+.feed-item--neutral  { border-left-color: var(--hold); }
 
-.feed-item__label {
-  font-size: 0.75rem;
-  font-weight: 700;
-}
-.feed-item__label--positive { color: #22c55e; }
-.feed-item__label--negative { color: #ef4444; }
-.feed-item__label--neutral  { color: #f59e0b; }
-
-.feed-item__score {
-  font-size: 0.75rem;
-  color: #b3b3b3;
-}
-
-.feed-item__time {
-  font-size: 0.72rem;
-  color: #808080;
-  margin-left: auto;
-}
-
-.feed-item__text {
-  margin: 0;
-  font-size: 0.85rem;
-  color: #e6e6e6;
-  line-height: 1.5;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.feed-item__footer {
-  display: flex;
-  align-items: center;
-}
-
-.feed-item__source {
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: #1a1a1a;
-  background: #b3b3b3;
-  padding: 2px 8px;
-  border-radius: 20px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.feed-list--empty,
-.feed-list--loading {
-  color: #808080;
-  padding: 16px;
-  text-align: center;
-}
+.feed-item:hover { background: var(--bg-secondary); }

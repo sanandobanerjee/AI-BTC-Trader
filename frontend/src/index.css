@@ -1,91 +1,31 @@
+@import url('https://fonts.googleapis.com/css2?family=Chonburi&family=Domine:wght@400;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
 :root {
-  --text: #b3b3b3;
-  --text-h: #e6e6e6;
-  --bg: #1a1a1a;
-  --border: #4d4d4d;
-  --code-bg: #2a2a2a;
-  --accent: #808080;
-  --accent-bg: rgba(128, 128, 128, 0.15);
-  --accent-border: rgba(128, 128, 128, 0.5);
-  --social-bg: rgba(77, 77, 77, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.2) 0 4px 6px -2px;
+  --bg-primary:    #1a1a1a;
+  --bg-secondary:  #2a2a2a;
+  --bg-tertiary:   #4d4d4d;
+  --text-primary:  #b3b3b3;
+  --text-em:       #e6e6e6;
+  --text-muted:    #808080;
+  --border:        #4d4d4d;
+  --border-light:  #808080;
+  --brand:         #f7931a;
+  --buy:           #22c55e;
+  --sell:          #ef4444;
+  --hold:          #f59e0b;
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+  --sans:    'Domine', serif;
+  --heading: 'Chonburi', sans-serif;
+  --mono:    'JetBrains Mono', monospace;
 
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
+  font: 14px/1.5 var(--sans);
+  color: var(--text-primary);
+  background: var(--bg-primary);
   color-scheme: dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
-}
-
-body {
-  margin: 0;
-}
-
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-}
-
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
-}
-
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
-}
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
-p {
-  margin: 0;
-}
-
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
-}
-
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
-}
+body { min-height: 100vh; background: var(--bg-primary); }
+h1, h2, h3 { font-family: var(--heading); font-weight: 400; color: var(--text-em); }
+code { font-family: var(--mono); font-size: 13px; background: var(--bg-secondary); padding: 2px 6px; border-radius: 4px; }

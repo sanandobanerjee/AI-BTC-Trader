@@ -6,25 +6,11 @@ import SentimentGauge from "../components/SentimentGauge"
 import PriceChart from "../components/PriceChart"
 import FeedList from "../components/FeedList"
 
-function LastUpdated({ timestamp }) {
-  if (!timestamp) return null
-  return (
-    <span className="dashboard__updated">
-      Last updated {timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-    </span>
-  )
-}
-
-function ErrorBanner({ message }) {
-  if (!message) return null
-  return <div className="dashboard__error">{message}</div>
-}
-
-function StatCard({ label, value, sub }) {
+function StatCard({ label, value, sub, valueClass }) {
   return (
     <div className="stat-card">
       <div className="stat-card__label">{label}</div>
-      <div className="stat-card__value">{value}</div>
+      <div className={`stat-card__value ${valueClass || ""}`}>{value}</div>
       {sub && <div className="stat-card__sub">{sub}</div>}
     </div>
   )
@@ -32,10 +18,12 @@ function StatCard({ label, value, sub }) {
 
 function Dashboard() {
   const {
-    signal,price,priceHistory,loading: signalLoading,error: signalError,lastUpdated,triggerPipeline,
+    signal, price, priceHistory,
+    loading: signalLoading, error: signalError,
+    lastUpdated, triggerPipeline,
   } = useSignal()
 
-  const { feed, loading: sentimentLoading, error: sentimentError } = useSentiment(20)
+  const { feed, loading: sentimentLoading, error: sentimentError } = useSentiment(30)
 
   const [aiText, setAiText]       = useState("")
   const [aiLoading, setAiLoading] = useState(false)
@@ -49,9 +37,7 @@ function Dashboard() {
     setAiText("")
     setAiError("")
     setAiLoading(true)
-
     abortRef.current = new AbortController()
-
     try {
       const res = await fetch(
         `${import.meta.env.VITE_API_URL || "http://localhost:8000"}/ai/explain`,
@@ -80,36 +66,49 @@ function Dashboard() {
     setAiLoading(false)
   }
 
-  function formatMarketCap(value) {
-    if (!value) return "-"
-    if (value >= 1e12) return "$" + (value / 1e12).toFixed(2) + "T"
-    if (value >= 1e9)  return "$" + (value / 1e9).toFixed(2) + "B"
-    return "$" + value.toLocaleString()
+  function formatMarketCap(v) {
+    if (!v) return "-"
+    if (v >= 1e12) return "$" + (v / 1e12).toFixed(2) + "T"
+    if (v >= 1e9)  return "$" + (v / 1e9).toFixed(2) + "B"
+    return "$" + v.toLocaleString()
   }
 
-  function formatVolume(value) {
-    if (!value) return "-"
-    if (value >= 1e9) return "$" + (value / 1e9).toFixed(2) + "B"
-    if (value >= 1e6) return "$" + (value / 1e6).toFixed(2) + "M"
-    return "$" + value.toLocaleString()
+  function formatVolume(v) {
+    if (!v) return "-"
+    if (v >= 1e9) return "$" + (v / 1e9).toFixed(2) + "B"
+    if (v >= 1e6) return "$" + (v / 1e6).toFixed(2) + "M"
+    return "$" + v.toLocaleString()
   }
+
+  const priceChangeClass = price?.price_change_24h_pct >= 0
+    ? "stat-card__value--positive"
+    : "stat-card__value--negative"
 
   return (
-    <div className="dashboard">
+    <div className="app-shell">
 
-      <header className="dashboard__header">
-        <div className="dashboard__title-group">
-          <h1 className="dashboard__title">
-            <span className="dashboard__title-btc">₿</span> SATURN
-          </h1>
-          <p className="dashboard__subtitle">
-            AI-powered signals from {feed.length} scored headlines
-          </p>
+      {/* ── Header ── */}
+      <header className="header">
+        <div className="header__brand">
+          <h1 className="header__title">Saturn</h1>
+          <span className="header__subtitle">
+            Sentiment-driven AI Trading &amp; Unified Recommendation Network
+          </span>
         </div>
-        <div className="dashboard__controls">
-          <LastUpdated timestamp={lastUpdated} />
+        <div className="header__status">
+          <div className="header__live">
+            <span className="header__live-dot" />
+            Live
+          </div>
+          {lastUpdated && (
+            <span className="header__updated">
+              Updated {lastUpdated.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+            </span>
+          )}
+        </div>
+        <div className="header__actions">
           <button
-            className="dashboard__trigger-btn"
+            className="header__refresh-btn"
             onClick={triggerPipeline}
             disabled={isLoading}
           >
@@ -118,85 +117,118 @@ function Dashboard() {
         </div>
       </header>
 
-      <ErrorBanner message={errorMessage} />
+      {/* ── Terminal Grid ── */}
+      <main className="terminal-grid">
 
-      <section className="dashboard__signal-row">
-        <div className="dashboard__signal-main">
-          <h2 className="dashboard__section-title">Current Signal</h2>
+        {errorMessage && (
+          <div className="error-banner">{errorMessage}</div>
+        )}
+
+        {/* Left Column */}
+        <div className="col-left">
           <SignalBadge signal={signal?.signal} confidence={signal?.confidence} />
-        </div>
-        <div className="dashboard__gauge">
-          <h2 className="dashboard__section-title">Market Sentiment</h2>
           <SentimentGauge
             positiveCount={signal?.positive_count}
             negativeCount={signal?.negative_count}
             neutralCount={signal?.neutral_count}
             sampleSize={signal?.sample_size}
           />
-        </div>
-      </section>
-
-      <section className="dashboard__stats-row">
-        <StatCard
-          label="BTC Price"
-          value={price ? "$" + price.price_usd.toLocaleString() : "-"}
-          sub={
-            price
-              ? (price.price_change_24h_pct >= 0 ? "+" : "") +
-                price.price_change_24h_pct?.toFixed(2) + "% (24h)"
-              : null
-          }
-        />
-        <StatCard label="Market Cap"   value={formatMarketCap(price?.market_cap_usd)} />
-        <StatCard label="Volume (24h)" value={formatVolume(price?.volume_24h_usd)} />
-        <StatCard
-          label="Avg Sentiment"
-          value={
-            signal?.avg_sentiment_score != null
-              ? (signal.avg_sentiment_score * 100).toFixed(1) + "%"
-              : "-"
-          }
-          sub={(signal?.sample_size ?? 0) + " articles analysed"}
-        />
-      </section>
-
-      <section className="dashboard__chart-section">
-        <h2 className="dashboard__section-title">Price History</h2>
-        <PriceChart priceHistory={priceHistory} currentPrice={price} />
-      </section>
-
-      <section className="dashboard__feed-section">
-        <h2 className="dashboard__section-title">Sentiment Feed</h2>
-        <FeedList feed={feed} loading={sentimentLoading} />
-      </section>
-
-      <section className="dashboard__ai-section">
-        <div className="dashboard__ai-header">
-          <h2 className="dashboard__section-title">Saturn-AI Signal Analysis</h2>
-          <button
-            className="dashboard__ai-btn"
-            onClick={aiLoading ? handleAbort : handleExplain}
-            disabled={!signal}
-          >
-            {aiLoading ? "⏹ Stop" : "✦ Ask Saturn-AI"}
-          </button>
-        </div>
-        {aiError && <div className="dashboard__error">{aiError}</div>}
-        {(aiText || aiLoading) && (
-          <div className="dashboard__ai-output">
-            <p className="dashboard__ai-text">
-              {aiText}
-              {aiLoading && <span className="dashboard__ai-cursor" />}
-            </p>
+          <div className="stat-grid">
+            <StatCard
+              label="BTC Price"
+              value={price ? "$" + price.price_usd.toLocaleString() : "-"}
+              valueClass="stat-card__value--brand"
+            />
+            <StatCard
+              label="24h Change"
+              value={
+                price
+                  ? (price.price_change_24h_pct >= 0 ? "+" : "") +
+                    price.price_change_24h_pct?.toFixed(2) + "%"
+                  : "-"
+              }
+              valueClass={priceChangeClass}
+            />
+            <StatCard
+              label="Market Cap"
+              value={formatMarketCap(price?.market_cap_usd)}
+            />
+            <StatCard
+              label="Avg Sentiment"
+              value={
+                signal?.avg_sentiment_score != null
+                  ? (signal.avg_sentiment_score * 100).toFixed(1) + "%"
+                  : "-"
+              }
+              sub={`${signal?.sample_size ?? 0} articles`}
+            />
           </div>
-        )}
-        {!aiText && !aiLoading && !aiError && (
-          <p className="dashboard__ai-placeholder">
-            Click "Ask Saturn-AI" to get a comprehensive breakdown of the current signal.
-          </p>
-        )}
-      </section>
+        </div>
 
+        {/* Centre Column */}
+        <div className="col-centre">
+          <div className="panel chart-panel">
+            <div className="panel__header">
+              <span className="panel__title">BTC / USD — 24h</span>
+            </div>
+            <PriceChart priceHistory={priceHistory} currentPrice={price} />
+          </div>
+
+          <div className="panel ai-panel">
+            <div className="panel__header">
+              <span className="panel__title">✦ Saturn AI Intelligence</span>
+              {aiLoading && (
+                <span style={{ fontSize: 10, fontFamily: "var(--mono)", color: "var(--buy)" }}>
+                  ● Analysing...
+                </span>
+              )}
+              {aiError && (
+                <span style={{ fontSize: 10, fontFamily: "var(--mono)", color: "var(--sell)" }}>
+                  {aiError}
+                </span>
+              )}
+            </div>
+            <div className="ai-panel__body">
+              {aiText ? (
+                <p className="ai-panel__output">
+                  {aiText}
+                  {aiLoading && <span className="ai-panel__cursor" />}
+                </p>
+              ) : (
+                <p className="ai-panel__placeholder">
+                  {aiLoading
+                    ? "Generating analysis..."
+                    : "Click below to get a plain-English breakdown of the current signal."}
+                </p>
+              )}
+            </div>
+            <div className="ai-panel__footer">
+              <button
+                className={`ai-panel__btn ${aiLoading ? "ai-panel__btn--stop" : ""}`}
+                onClick={aiLoading ? handleAbort : handleExplain}
+                disabled={!signal}
+              >
+                {aiLoading ? "⏹ Stop Analysis" : "✦ Ask Saturn AI"}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column */}
+        <div className="col-right">
+          <div className="feed-panel">
+            <div className="feed-panel__header">
+              <span className="panel__title">Data Sources</span>
+              <div className="feed-panel__live">
+                <span className="feed-panel__live-dot" />
+                Live
+              </div>
+            </div>
+            <FeedList feed={feed} loading={sentimentLoading} />
+          </div>
+        </div>
+
+      </main>
     </div>
   )
 }
