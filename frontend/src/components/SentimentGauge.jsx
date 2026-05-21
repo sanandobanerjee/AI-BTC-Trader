@@ -25,20 +25,6 @@ function SentimentGauge({ positiveCount, negativeCount, neutralCount, sampleSize
     <div className={`sentiment-gauge ${dominantClass}`}>
       <div className="sentiment-gauge__label">{dominantLabel}</div>
       <div className="sentiment-gauge__sublabel">Current Sentiment</div>
-      <div className="sentiment-gauge__bar">
-        <div
-          className="sentiment-gauge__segment sentiment-gauge__segment--positive"
-          style={{ width: `${positivePct}%` }}
-        />
-        <div
-          className="sentiment-gauge__segment sentiment-gauge__segment--neutral"
-          style={{ width: `${neutralPct}%` }}
-        />
-        <div
-          className="sentiment-gauge__segment sentiment-gauge__segment--negative"
-          style={{ width: `${negativePct}%` }}
-        />
-      </div>
       <div className="sentiment-gauge__stats">
         {[
           { key: "positive", label: "Bullish", value: positivePct },
@@ -46,10 +32,7 @@ function SentimentGauge({ positiveCount, negativeCount, neutralCount, sampleSize
           { key: "negative", label: "Bearish", value: negativePct },
         ].map(({ key, label, value }) => (
           <div key={key} className={`sentiment-gauge__stat sentiment-gauge__stat--${key}`}>
-            <span className="sentiment-gauge__stat-left">
-              <span className="sentiment-gauge__stat-dot" />
-              <span className="sentiment-gauge__stat-name">{label} - </span>
-            </span>
+            <span className="sentiment-gauge__stat-name">{label} - </span>
             <span className="sentiment-gauge__stat-val">{value}%</span>
           </div>
         ))}

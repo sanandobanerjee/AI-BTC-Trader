@@ -19,8 +19,8 @@ function SignalBadge({ signal, confidence }) {
 
   return (
     <div className={`signal-badge ${className}`}>
-      <span className="signal-badge__eyebrow">Active Signal - </span>
-      <span className="signal-badge__label">{label} </span>
+      <span className="signal-badge__eyebrow">Active Signal</span>
+      <span className="signal-badge__label"> {label} </span>
       <span className="signal-badge__confidence">{confidencePct}% Confidence</span>
     </div>
   )

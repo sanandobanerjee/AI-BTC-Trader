@@ -12,42 +12,50 @@ function timeAgo(isoString) {
   return `${Math.floor(seconds / 86400)}d ago`
 }
 
+const LABEL_COLOR = {
+  positive: "var(--buy)",
+  negative: "var(--sell)",
+  neutral:  "var(--hold)",
+}
+
 function FeedList({ feed, loading }) {
   if (loading) {
-    return <div className="feed-list feed-list--loading"><p>Loading feed...</p></div>
+    return (
+      <div className="feed-list feed-list--state">
+        <p className="feed-list__message">Loading feed...</p>
+      </div>
+    )
   }
 
   if (!feed || feed.length === 0) {
     return (
-      <div className="feed-list feed-list--empty">
-        <p>No records yet. Trigger pipeline to fetch articles.</p>
+      <div className="feed-list feed-list--state">
+        <p className="feed-list__message">No records yet. Trigger pipeline to fetch articles.</p>
       </div>
     )
   }
 
   return (
-    <ul className="feed-list">
+    <div className="feed-list">
       {feed.map((record) => {
         const label = record.label ?? "neutral"
         const score = ((record.score ?? 0) * 100).toFixed(0)
+        const color = LABEL_COLOR[label] ?? LABEL_COLOR.neutral
 
         return (
-          <li key={record.id} className={`feed-item feed-item--${label}`}>
+          <div key={record.id} className="feed-item">
             <div className="feed-item__header">
-              <span className="feed-item__source">{record.source}</span>
-              <div className="feed-item__meta-right">
-                <span className={`feed-item__label feed-item__label--${label}`}>
-                  {label}
-                </span>
-                <span className="feed-item__score">{score}%</span>
-              </div>
+              <span className="feed-item__sentiment" style={{ color }}>
+                {label.charAt(0).toUpperCase() + label.slice(1)}
+                <span className="feed-item__score"> — {score}%</span>
+              </span>
+              <span className="feed-item__time">{timeAgo(record.created_at)}</span>
             </div>
             <p className="feed-item__text">{stripHtml(record.raw_text)}</p>
-            <span className="feed-item__time">{timeAgo(record.created_at)}</span>
-          </li>
+          </div>
         )
       })}
-    </ul>
+    </div>
   )
 }
 

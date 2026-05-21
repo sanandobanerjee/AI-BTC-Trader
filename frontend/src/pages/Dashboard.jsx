@@ -73,13 +73,6 @@ function Dashboard() {
     return "$" + v.toLocaleString()
   }
 
-  function formatVolume(v) {
-    if (!v) return "-"
-    if (v >= 1e9) return "$" + (v / 1e9).toFixed(2) + "B"
-    if (v >= 1e6) return "$" + (v / 1e6).toFixed(2) + "M"
-    return "$" + v.toLocaleString()
-  }
-
   const priceChangeClass = price?.price_change_24h_pct >= 0
     ? "stat-card__value--positive"
     : "stat-card__value--negative"
@@ -169,9 +162,9 @@ function Dashboard() {
         <div className="col-centre">
           <div className="panel chart-panel">
             <div className="panel__header">
-              <span className="panel__title">BTC / USD — 24h</span>
+              <span className="panel__title">Price Chart</span>
             </div>
-            <PriceChart priceHistory={priceHistory} currentPrice={price} />
+            <PriceChart priceHistory={priceHistory} />
           </div>
 
           <div className="panel ai-panel">

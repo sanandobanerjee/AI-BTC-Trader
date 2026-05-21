@@ -12,14 +12,7 @@ function formatPrice(value) {
   return "$" + Number(value).toLocaleString()
 }
 
-function formatMarketCap(v) {
-  if (!v) return "-"
-  if (v >= 1e12) return "$" + (v / 1e12).toFixed(2) + "T"
-  if (v >= 1e9)  return "$" + (v / 1e9).toFixed(2) + "B"
-  return "$" + v.toLocaleString()
-}
-
-function PriceChart({ priceHistory, currentPrice }) {
+function PriceChart({ priceHistory }) {
   if (!priceHistory || priceHistory.length === 0) {
     return <div className="price-chart price-chart--empty"><p>No price history yet</p></div>
   }
@@ -35,34 +28,8 @@ function PriceChart({ priceHistory, currentPrice }) {
   const padding  = (maxPrice - minPrice) * 0.1
   const yDomain  = [Math.floor(minPrice - padding), Math.ceil(maxPrice + padding)]
 
-  const changePositive = (currentPrice?.price_change_24h_pct ?? 0) >= 0
-
   return (
     <div className="price-chart">
-      {currentPrice && (
-        <div className="price-chart__current">
-          <div className="price-chart__stat">
-            <span className="price-chart__stat-label">Price - </span>
-            <span className="price-chart__stat-value">
-              {formatPrice(currentPrice.price_usd)}
-            </span>
-          </div>
-          <div className="price-chart__divider" />
-          <div className="price-chart__stat">
-            <span className="price-chart__stat-label">24h Change </span>
-            <span className={`price-chart__stat-value price-chart__stat-value--${changePositive ? "positive" : "negative"}`}>
-              {changePositive ? "+" : ""}{currentPrice.price_change_24h_pct?.toFixed(2)}%
-            </span>
-          </div>
-          <div className="price-chart__divider" />
-          <div className="price-chart__stat">
-            <span className="price-chart__stat-label">Market Cap - </span>
-            <span className="price-chart__stat-value">
-              {formatMarketCap(currentPrice.market_cap_usd)}
-            </span>
-          </div>
-        </div>
-      )}
       <div className="price-chart__graph">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={chartData} margin={{ top: 8, right: 10, left: -20, bottom: 0 }}>
