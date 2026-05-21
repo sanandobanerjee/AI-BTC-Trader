@@ -18,16 +18,29 @@
   content: '';
   position: absolute;
   inset: 0;
-  opacity: 0.06;
+  opacity: 0.08;
   pointer-events: none;
+}
+
+.signal-badge::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  border-radius: 8px 0 0 8px;
 }
 
 .signal-badge--buy        { border-color: var(--buy); }
 .signal-badge--buy::before  { background: var(--buy); }
+.signal-badge--buy::after   { background: var(--buy); box-shadow: 0 0 12px var(--buy); }
 .signal-badge--sell       { border-color: var(--sell); }
 .signal-badge--sell::before { background: var(--sell); }
+.signal-badge--sell::after  { background: var(--sell); box-shadow: 0 0 12px var(--sell); }
 .signal-badge--hold       { border-color: var(--hold); }
 .signal-badge--hold::before { background: var(--hold); }
+.signal-badge--hold::after  { background: var(--hold); box-shadow: 0 0 12px var(--hold); }
 .signal-badge--empty      { border-color: var(--border); }
 
 .signal-badge__eyebrow {
@@ -46,12 +59,25 @@
   line-height: 1;
   letter-spacing: 0.02em;
   display: block;
+  filter: brightness(1.15);
 }
 
-.signal-badge--buy  .signal-badge__label  { color: var(--buy); }
-.signal-badge--sell .signal-badge__label  { color: var(--sell); }
-.signal-badge--hold .signal-badge__label  { color: var(--hold); }
-.signal-badge--empty .signal-badge__label { color: var(--text-muted); font-size: 18px; }
+.signal-badge--buy  .signal-badge__label  {
+  color: var(--buy);
+  text-shadow: 0 0 40px color-mix(in srgb, var(--buy) 50%, transparent);
+}
+.signal-badge--sell .signal-badge__label  {
+  color: var(--sell);
+  text-shadow: 0 0 40px color-mix(in srgb, var(--sell) 50%, transparent);
+}
+.signal-badge--hold .signal-badge__label  {
+  color: var(--hold);
+  text-shadow: 0 0 40px color-mix(in srgb, var(--hold) 50%, transparent);
+}
+.signal-badge--empty .signal-badge__label {
+  color: var(--text-muted);
+  font-size: 18px;
+}
 
 .signal-badge__confidence {
   font-size: 12px;
@@ -74,7 +100,22 @@
   min-height: 0;
   display: flex;
   flex-direction: column;
+  position: relative;
+  overflow: hidden;
 }
+
+.sentiment-gauge::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.05;
+  pointer-events: none;
+  border-radius: 8px;
+}
+
+.sentiment-gauge--bullish::before { background: var(--buy); }
+.sentiment-gauge--bearish::before { background: var(--sell); }
+.sentiment-gauge--neutral::before { background: var(--hold); }
 
 .sentiment-gauge__label {
   font-family: var(--heading);
@@ -82,6 +123,21 @@
   letter-spacing: 0.02em;
   line-height: 1;
   margin-bottom: 2px;
+  position: relative;
+  filter: brightness(1.1);
+}
+
+.sentiment-gauge--bullish .sentiment-gauge__label {
+  color: var(--buy);
+  text-shadow: 0 0 32px color-mix(in srgb, var(--buy) 45%, transparent);
+}
+.sentiment-gauge--bearish .sentiment-gauge__label {
+  color: var(--sell);
+  text-shadow: 0 0 32px color-mix(in srgb, var(--sell) 45%, transparent);
+}
+.sentiment-gauge--neutral .sentiment-gauge__label {
+  color: var(--hold);
+  text-shadow: 0 0 32px color-mix(in srgb, var(--hold) 45%, transparent);
 }
 
 .sentiment-gauge__sublabel {
@@ -91,24 +147,35 @@
   letter-spacing: 0.14em;
   color: var(--text-muted);
   margin-bottom: 18px;
+  position: relative;
 }
-
-.sentiment-gauge--bullish .sentiment-gauge__label { color: var(--buy); }
-.sentiment-gauge--bearish .sentiment-gauge__label { color: var(--sell); }
-.sentiment-gauge--neutral .sentiment-gauge__label { color: var(--hold); }
 
 .sentiment-gauge__stats {
   display: flex;
   flex-direction: column;
   gap: 10px;
   flex: 1;
+  position: relative;
 }
 
 .sentiment-gauge__stat {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding: 6px 10px;
+  border-radius: 5px;
+  transition: background 0.2s;
 }
+
+.sentiment-gauge--bullish .sentiment-gauge__stat--positive,
+.sentiment-gauge--bearish .sentiment-gauge__stat--negative,
+.sentiment-gauge--neutral .sentiment-gauge__stat--neutral {
+  background: color-mix(in srgb, currentColor 8%, transparent);
+}
+
+.sentiment-gauge--bullish .sentiment-gauge__stat--positive { color: var(--buy); }
+.sentiment-gauge--bearish .sentiment-gauge__stat--negative { color: var(--sell); }
+.sentiment-gauge--neutral .sentiment-gauge__stat--neutral  { color: var(--hold); }
 
 .sentiment-gauge__stat-name {
   color: var(--text-muted);
@@ -117,6 +184,10 @@
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
+
+.sentiment-gauge--bullish .sentiment-gauge__stat--positive .sentiment-gauge__stat-name { color: var(--buy); }
+.sentiment-gauge--bearish .sentiment-gauge__stat--negative .sentiment-gauge__stat-name { color: var(--sell); }
+.sentiment-gauge--neutral .sentiment-gauge__stat--neutral  .sentiment-gauge__stat-name { color: var(--hold); }
 
 .sentiment-gauge__stat-val {
   font-family: var(--mono);
@@ -136,6 +207,7 @@
   margin-top: 14px;
   padding-top: 12px;
   border-top: 1px solid var(--border);
+  position: relative;
 }
 
 .sentiment-gauge--empty {
