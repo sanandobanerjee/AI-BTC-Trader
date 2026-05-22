@@ -19,7 +19,7 @@ Saturn is a full-stack Bitcoin trading decision making platform. It ingests cryp
 
 ## Architecture
 
-![alt text](<Saturn Architecture-1.png>)
+![alt text](<Saturn Architecture.png>)
 
 ## Tech Stack
 
