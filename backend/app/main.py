@@ -10,7 +10,8 @@ from scheduler.jobs import start_scheduler, stop_scheduler
 from app.api.routes.ai import router as ai_router
 from dotenv import load_dotenv
 from pathlib import Path
-load_dotenv(dotenv_path=Path(__file__).parent.parent/".env")
+
+load_dotenv(dotenv_path=Path(__file__).parent.parent / ".env")
 
 LOGGING_CONFIG = {
     "version": 1,
@@ -28,12 +29,13 @@ LOGGING_CONFIG = {
     },
     "root": {
         "level": "INFO",
-        "handlers": ["console"]
-    }
+        "handlers": ["console"],
+    },
 }
 
 logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger(__name__)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -47,31 +49,34 @@ async def lifespan(app: FastAPI):
     await close_db()
     logger.info("Application stopped")
 
-FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
+def _build_origins() -> list[str]:
+    origins = ["http://localhost:5173"]
+    frontend_url = os.getenv("FRONTEND_URL", "").strip()
+    if frontend_url:
+        origins.append(frontend_url)
+    return origins
+
 
 app = FastAPI(
-    title="BTC Sentiment Trader",
-    description="AI bitcoin sentiment trading signals",
+    title="Saturn",
+    description="Sentiment-driven AI Trading & Unified Recommendation Network",
     version="1.0.0",
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "https://your-frontend.vercel.app",
-        FRONTEND_URL,
-    ],
+    allow_origins=_build_origins(),
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"]
+    allow_headers=["*"],
 )
 
 app.include_router(sentiment.router)
 app.include_router(signals.router)
 app.include_router(price.router)
 app.include_router(ai_router)
+
 
 @app.get("/health", tags=["health"])
 async def health_check():

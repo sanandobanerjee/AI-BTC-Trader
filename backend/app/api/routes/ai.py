@@ -1,19 +1,19 @@
-import os
 import logging
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
 from groq import AsyncGroq
+from app.core.config import get_settings
 from app.core.database import get_database
 from app.repositories.sentiment_repository import SentimentRepository
 from app.repositories.signal_repository import SignalRepository
 
-FRONTEND_ORIGIN=os.getenv("FRONTEND_URL","http://localhost:5173")
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/ai", tags=["ai"])
 
 @router.get("/explain")
 async def explain_signal():
-    client = AsyncGroq(api_key=os.getenv("GROQ_API_KEY"))
+    settings = get_settings()
+    client = AsyncGroq(api_key=settings.GROQ_API_KEY)
     db = get_database()
     sentiment_repo = SentimentRepository(db)
     signal_repo = SignalRepository(db)
@@ -56,4 +56,8 @@ Explain in under 150 words: why the signal is {signal.signal}, what headlines ar
             logger.error(f"Groq stream error: {e}")
             yield "\n[Error generating analysis. Check your API key and try again.]"
 
-    return StreamingResponse(stream_response(), media_type="text/plain",headers={"Access-Control-Allow-Origin":"http://localhost:5173"})
+    return StreamingResponse(
+        stream_response(),
+        media_type="text/plain",
+        headers={"Access-Control-Allow-Origin": settings.FRONTEND_URL},
+    )
