@@ -3,6 +3,7 @@ services:
     name: saturn-backend
     runtime: python
     rootDir: backend
+    pythonVersion: "3.13.0"
     buildCommand: pip install -r backend/requirements.txt
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
     envVars:
