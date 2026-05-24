@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: saturn-backend
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: MONGODB_URI
+        sync: false
+      - key: MONGODB_DB_NAME
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: HUGGINGFACE_API_KEY
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+      - key: COINGECKO_BASE_URL
+        value: https://api.coingecko.com/api/v3
