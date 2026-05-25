@@ -29,3 +29,44 @@
 body { min-height: 100vh; background: var(--bg-primary); }
 h1, h2, h3 { font-family: var(--heading); font-weight: 400; color: var(--text-em); }
 code { font-family: var(--mono); font-size: 13px; background: var(--bg-secondary); padding: 2px 6px; border-radius: 4px; }
+
+.wake-screen {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  background: var(--bg-primary);
+}
+
+.wake-screen__title {
+  font-family: var(--heading);
+  font-size: 48px;
+  color: var(--brand);
+  letter-spacing: 0.04em;
+}
+
+.wake-screen__msg {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+}
+
+.wake-screen__dot-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.wake-screen__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--brand);
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+.wake-screen__dot:nth-child(2) { animation-delay: 0.2s; }
+.wake-screen__dot:nth-child(3) { animation-delay: 0.4s; }
