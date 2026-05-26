@@ -37,4 +37,7 @@ export const priceApi = {
     api.get("/price/btc/history", { params: { limit } }),
 }
 
+export const healthApi={
+    ping: ()=> api.get("/health")
+}
 export default api
