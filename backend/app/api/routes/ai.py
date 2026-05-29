@@ -29,7 +29,7 @@ async def explain_signal():
         for r in records
     ])
 
-    prompt = f"""You are a concise crypto market analyst. Explain the following Bitcoin trading signal to a trader in plain English. Be specific — reference actual headlines and sources where relevant.
+    prompt = f"""You are a concise crypto market analyst. Explain the following Bitcoin trading signal to a layman in plain English. Be specific — reference actual headlines and sources where relevant.
 
 CURRENT SIGNAL: {signal.signal} (confidence: {signal.confidence * 100:.1f}%)
 AVG SENTIMENT SCORE: {signal.avg_sentiment_score * 100:.1f}%
@@ -38,7 +38,7 @@ BREAKDOWN: {signal.positive_count} positive, {signal.negative_count} negative, {
 RECENT HEADLINES:
 {feed_summary}
 
-Explain in under 150 words: why the signal is {signal.signal}, what headlines are driving it, and any notable source patterns."""
+Explain in under 200 words: why the signal is {signal.signal}, what headlines are driving it(mention notable positive, neutral and negative news and how they overlap each other to yield the final answer), and any notable source patterns."""
 
     async def stream_response():
         try:
