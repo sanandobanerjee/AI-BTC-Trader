@@ -49,11 +49,13 @@ async def lifespan(app: FastAPI):
     await close_db()
     logger.info("Application stopped")
 
+
 def _build_origins() -> list[str]:
     origins = ["http://localhost:5173"]
     frontend_url = os.getenv("FRONTEND_URL", "").strip()
     if frontend_url:
         origins.append(frontend_url)
+    logger.info(f"CORS origins: {origins}")
     return origins
 
 
@@ -64,10 +66,13 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+cors_origins = ["*"] if os.getenv("CORS_ALLOW_ALL") == "true" else _build_origins()
+logger.info(f"Starting with CORS origins: {cors_origins}")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=_build_origins(),
-    allow_credentials=True,
+    allow_origins=cors_origins,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
