@@ -1,6 +1,6 @@
 <div align="center">
 
-# ◈ Saturn
+# ◈ $aturn
 
 ### Sentiment-driven AI Trading & Unified Recommendation Network
 
@@ -45,11 +45,11 @@ Saturn is a full-stack Bitcoin intelligence platform that turns live crypto news
 
 ---
 
-## Screenshot
+## Dashboard
 
 <div align="center">
 
-<img src="https://placehold.co/1400x800/0f172a/ffffff?text=Saturn+Dashboard" alt="Saturn dashboard preview" width="900" />
+<img src="https://res.cloudinary.com/hlwsik4u/image/upload/v1784217027/Saturn_Look_May_26_amxfaq.jpg" alt="Saturn dashboard preview" width="900" />
 
 </div>
 
@@ -57,7 +57,8 @@ Saturn is a full-stack Bitcoin intelligence platform that turns live crypto news
 
 ## Architecture
 
-Saturn is built as a modular pipeline that moves from ingestion to insight:
+Saturn is built using the SOLID principles as a guideline. All the ideas provided in the SOLID framework are implemented as cleanly as possible.
+The app is constructed as a modular pipeline that moves from ingestion to insight:
 
 1. RSS feeds are collected and normalized into article-like payloads.
 2. Each article is scored by FinBERT for sentiment polarity and confidence.
@@ -118,7 +119,7 @@ Saturn exposes two AI-powered interfaces over the same data layer:
 <summary>View repository layout</summary>
 
 ```text
-AI-BTC-Trader/
+Saturn-AI/
 ├── backend/
 │   ├── app/
 │   │   ├── core/
@@ -169,7 +170,7 @@ AI-BTC-Trader/
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/YOUR_USERNAME/AI-BTC-Trader.git
+git clone https://github.com/sanandobanerjee/Saturn-AI.git
 cd AI-BTC-Trader/backend
 ```
 
@@ -261,15 +262,12 @@ pytest tests/
 
 ## Roadmap
 
-- [x] RSS ingestion pipeline
-- [x] FinBERT sentiment scoring
-- [x] Signal generation engine
-- [x] FastAPI backend with live endpoints
-- [x] React terminal dashboard
-- [x] Streaming AI explanation panel
-- [x] MCP server integration
-- [ ] Frontend testing and polish
-- [ ] Deployment to Render and Vercel
+A list of ideas which can be implemented after deployment:
+
+-> Integrating other cryptocurrency markets
+-> Higher source transparency
+-> Integrating the Indian Stock market
+-> Higher information ingestion for better results
 
 ---
 
