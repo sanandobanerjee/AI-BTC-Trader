@@ -1,4 +1,3 @@
-import ssl
 import certifi
 from motor.motor_asyncio import AsyncIOMotorClient
 from app.core.config import get_settings
@@ -6,18 +5,11 @@ from app.core.config import get_settings
 settings=get_settings()
 client: AsyncIOMotorClient=None
 
-def _make_ssl_context() -> ssl.SSLContext:
-    ctx=ssl.create_default_context(cafile=certifi.where())
-    ctx.minimum_version=ssl.TLSVersion.TLSv1_2
-    ctx.maximum_version=ssl.TLSVersion.TLSv1_2
-    return ctx
-
 async def connect_db():
     global client
     client=AsyncIOMotorClient(
         settings.MONGODB_URI,
-        tlsCAFile=certifi.where(),
-        ssl_context=_make_ssl_context())
+        tlsCAFile=certifi.where())
 
 async def close_db():
     global client
