@@ -1,51 +1,62 @@
+import json
 import asyncio
-import httpx
+from groq import AsyncGroq
 from app.models.sentiment import SentimentRecord
 from app.repositories.sentiment_repository import SentimentRepository
 from app.core.config import get_settings
 
-#huggingface servers are now called instead of running FINBERT locally to drive down RAM usage. Now can be hosted on render free tier
-#trade-off: higher latency on startup and rate-limiting
-
-HF_API_URL = "https://api-inference.huggingface.co/models/ProsusAI/finbert"
-LABEL_MAP = {
-    "positive": "positive",
-    "negative": "negative",
-    "neutral":  "neutral",
+LABEL_MAP={
+    "positive":"positive",
+    "negative":"negative",
+    "neutral":"neutral",
 }
-WARMUP_RETRIES = 3
-WARMUP_WAIT    = 25
+
+SENTIMENT_PROMPT="""You are a financial sentiment classifier. Classify each headline as positive,negative or neutral from the perspective of a Bitcoin investor.
+
+Return results strictly as a JSON array with no markdown,no explanation, no extra text. One object per headline in the same order.
+Each object must have exactly two keys:"label"(positive,negative or neutral) and "score"  (float 0.0-1.0 respresenting the confidence of the indication)
+
+Headline:
+{headlines}
+
+JSON array: """
+#temperature set to 0.0 to get deterministic verdict
 
 class SentimentService:
-    def __init__(self, repository: SentimentRepository):
-        self.repository = repository
-        self._settings  = get_settings()
+    def __init__(self,repository:SentimentRepository):
+        self.repository=repository
+        self._settings=get_settings()
 
-    async def _call_api(self, texts: list[str]) -> list[tuple[str, float]]:
-        headers = {"Authorization": f"Bearer {self._settings.HUGGINGFACE_API_KEY}"}
-        payload = {"inputs": texts, "options": {"wait_for_model": True}}
+    async def _call_api(self,texts:list[str])-> list[tuple[str,float]]:
+        client=AsyncGroq(api_key=self._settings.GROQ_API_KEY)
 
-        async with httpx.AsyncClient(timeout=60.0) as client:
-            for attempt in range(WARMUP_RETRIES):
-                response = await client.post(HF_API_URL, headers=headers, json=payload)
-                data     = response.json()
+        headlines="\n".join(f"{i+1}.{t}" for i,t in enumerate(texts))
+        prompt=SENTIMENT_PROMPT.format(headlines=headlines)
 
-                if isinstance(data, dict) and "loading" in data.get("error", ""):
-                    wait = data.get("estimated_time", WARMUP_WAIT)
-                    await asyncio.sleep(wait)
-                    continue
+        try:
+            response=await client.chat.completions.create(
+                model="llama-3.1-8b-instant",
+                messages=[{"role":"user","content":prompt}],
+                max_tokens=1024,
+                temperature=0.0
+            )
 
-                response.raise_for_status()
+            raw=response.choices[0].message.content.strip()
+            data=json.loads(raw)    #parses response to strip away uselees text
 
-                results = []
-                for item in data:
-                    top   = max(item, key=lambda x: x["score"])
-                    label = LABEL_MAP.get(top["label"].lower(), "neutral")
-                    score = round(top["score"], 4)
-                    results.append((label, score))
-                return results
+            results=[]
+            for item in data:
+                label = LABEL_MAP.get(str(item.get("label", "")).lower(), "neutral")
+                score = round(float(item.get("score", 0.5)), 4)
+                results.append((label, score))
 
-        return [("neutral", 0.0)] * len(texts)
+            if len(results) != len(texts):  #in case extra/less results sent back
+                return [("neutral", 0.5)] * len(texts)  
+
+            return results
+
+        except Exception:
+            return [("neutral", 0.5)] * len(texts)      #0.5 confidence for fallbacks to least affect average sentiment
 
     async def analyse_batch(self, posts: list[dict]) -> list[SentimentRecord]:
         texts   = [p["text"] for p in posts]
@@ -65,7 +76,7 @@ class SentimentService:
         return records
 
     async def analyse_and_store(self, text: str, source: str) -> SentimentRecord:
-        results     = await self._call_api([text])
+        results      = await self._call_api([text])
         label, score = results[0]
         record = SentimentRecord(
             source=source,
