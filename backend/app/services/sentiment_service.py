@@ -1,62 +1,72 @@
+import re
 import json
-import asyncio
 from groq import AsyncGroq
 from app.models.sentiment import SentimentRecord
 from app.repositories.sentiment_repository import SentimentRepository
 from app.core.config import get_settings
 
-LABEL_MAP={
-    "positive":"positive",
-    "negative":"negative",
-    "neutral":"neutral",
+LABEL_MAP = {
+    "positive": "positive",
+    "negative": "negative",
+    "neutral":  "neutral",
 }
 
-SENTIMENT_PROMPT="""You are a financial sentiment classifier. Classify each headline as positive,negative or neutral from the perspective of a Bitcoin investor.
+SENTIMENT_PROMPT = """You are a financial sentiment classifier. Classify each headline as positive, negative, or neutral from a Bitcoin/crypto investor perspective.
 
-Return results strictly as a JSON array with no markdown,no explanation, no extra text. One object per headline in the same order.
-Each object must have exactly two keys:"label"(positive,negative or neutral) and "score"  (float 0.0-1.0 respresenting the confidence of the indication)
+Return ONLY a raw JSON array. No markdown, no code fences, no explanation, no extra text before or after.
+One object per headline in the same order as given.
+Each object must have exactly two keys: "label" (one of: positive, negative, neutral) and "score" (float 0.0-1.0 confidence).
 
-Headline:
-{headlines}
+Example output format:
+[{"label": "positive", "score": 0.92}, {"label": "neutral", "score": 0.71}]
 
-JSON array: """
-#temperature set to 0.0 to get deterministic verdict
+Headlines:
+{headlines}"""
+
 
 class SentimentService:
-    def __init__(self,repository:SentimentRepository):
-        self.repository=repository
-        self._settings=get_settings()
+    def __init__(self, repository: SentimentRepository):
+        self.repository = repository
+        self._settings  = get_settings()
 
-    async def _call_api(self,texts:list[str])-> list[tuple[str,float]]:
-        client=AsyncGroq(api_key=self._settings.GROQ_API_KEY)
+    def _parse_response(self, raw: str, count: int) -> list[tuple[str, float]]:
+        cleaned = re.sub(r"```(?:json)?", "", raw).strip().strip("`").strip()
 
-        headlines="\n".join(f"{i+1}.{t}" for i,t in enumerate(texts))
-        prompt=SENTIMENT_PROMPT.format(headlines=headlines)
+        start = cleaned.find("[")
+        end   = cleaned.rfind("]")
+        if start != -1 and end != -1 and end > start:
+            cleaned = cleaned[start:end + 1]
+
+        data = json.loads(cleaned)
+
+        results = []
+        for item in data:
+            label = LABEL_MAP.get(str(item.get("label", "")).lower(), "neutral")
+            score = round(float(item.get("score", 0.5)), 4)
+            results.append((label, score))
+
+        if len(results) != count:
+            return [("neutral", 0.5)] * count
+
+        return results
+
+    async def _call_api(self, texts: list[str]) -> list[tuple[str, float]]:
+        client    = AsyncGroq(api_key=self._settings.GROQ_API_KEY)
+        headlines = "\n".join(f"{i+1}. {t}" for i, t in enumerate(texts))
+        prompt    = SENTIMENT_PROMPT.format(headlines=headlines)
 
         try:
-            response=await client.chat.completions.create(
+            response = await client.chat.completions.create(
                 model="llama-3.1-8b-instant",
-                messages=[{"role":"user","content":prompt}],
+                messages=[{"role": "user", "content": prompt}],
                 max_tokens=1024,
-                temperature=0.0
+                temperature=0.0,
             )
-
-            raw=response.choices[0].message.content.strip()
-            data=json.loads(raw)    #parses response to strip away uselees text
-
-            results=[]
-            for item in data:
-                label = LABEL_MAP.get(str(item.get("label", "")).lower(), "neutral")
-                score = round(float(item.get("score", 0.5)), 4)
-                results.append((label, score))
-
-            if len(results) != len(texts):  #in case extra/less results sent back
-                return [("neutral", 0.5)] * len(texts)  
-
-            return results
+            raw = response.choices[0].message.content.strip()
+            return self._parse_response(raw, len(texts))
 
         except Exception:
-            return [("neutral", 0.5)] * len(texts)      #0.5 confidence for fallbacks to least affect average sentiment
+            return [("neutral", 0.5)] * len(texts)
 
     async def analyse_batch(self, posts: list[dict]) -> list[SentimentRecord]:
         texts   = [p["text"] for p in posts]
