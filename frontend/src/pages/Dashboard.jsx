@@ -33,14 +33,16 @@ function Dashboard() {
   const isLoading    = signalLoading || sentimentLoading
   const errorMessage = signalError || sentimentError
 
-  async function handleExplain() {
+const API_BASE = (import.meta.env.VITE_API_URL || "http://localhost:8000").replace(/\/$/, "")
+
+async function handleExplain() {
     setAiText("")
     setAiError("")
     setAiLoading(true)
     abortRef.current = new AbortController()
     try {
       const res = await fetch(
-        `${import.meta.env.VITE_API_URL || "http://localhost:8000"}/ai/explain`,
+        `${API_BASE}/ai/explain`,
         { signal: abortRef.current.signal }
       )
       if (!res.ok) {
@@ -60,7 +62,7 @@ function Dashboard() {
       setAiLoading(false)
     }
   }
-
+  
   function handleAbort() {
     abortRef.current?.abort()
     setAiLoading(false)

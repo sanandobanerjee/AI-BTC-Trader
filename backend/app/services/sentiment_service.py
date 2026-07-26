@@ -11,17 +11,18 @@ LABEL_MAP = {
     "neutral":  "neutral",
 }
 
-SENTIMENT_PROMPT = """You are a financial sentiment classifier. Classify each headline as positive, negative, or neutral from a Bitcoin/crypto investor perspective.
-
-Return ONLY a raw JSON array. No markdown, no code fences, no explanation, no extra text before or after.
-One object per headline in the same order as given.
-Each object must have exactly two keys: "label" (one of: positive, negative, neutral) and "score" (float 0.0-1.0 confidence).
-
-Example output format:
-[{"label": "positive", "score": 0.92}, {"label": "neutral", "score": 0.71}]
-
-Headlines:
-{headlines}"""
+SENTIMENT_INSTRUCTIONS = (
+    "You are a financial sentiment classifier. Classify each headline as "
+    "positive, negative, or neutral from a Bitcoin/crypto investor perspective.\n\n"
+    "Return ONLY a raw JSON array. No markdown, no code fences, no explanation, "
+    "no extra text before or after.\n"
+    "One object per headline in the same order as given.\n"
+    'Each object must have exactly two keys: "label" (one of: positive, negative, neutral) '
+    'and "score" (float 0.0-1.0 confidence).\n\n'
+    'Example output format:\n'
+    '[{"label": "positive", "score": 0.92}, {"label": "neutral", "score": 0.71}]\n\n'
+    "Headlines:\n"
+)
 
 
 class SentimentService:
@@ -53,7 +54,7 @@ class SentimentService:
     async def _call_api(self, texts: list[str]) -> list[tuple[str, float]]:
         client    = AsyncGroq(api_key=self._settings.GROQ_API_KEY)
         headlines = "\n".join(f"{i+1}. {t}" for i, t in enumerate(texts))
-        prompt    = SENTIMENT_PROMPT.format(headlines=headlines)
+        prompt    = SENTIMENT_INSTRUCTIONS + headlines
 
         try:
             response = await client.chat.completions.create(
@@ -65,7 +66,9 @@ class SentimentService:
             raw = response.choices[0].message.content.strip()
             return self._parse_response(raw, len(texts))
 
-        except Exception:
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).error(f"Groq sentiment call failed: {e}")
             return [("neutral", 0.5)] * len(texts)
 
     async def analyse_batch(self, posts: list[dict]) -> list[SentimentRecord]:
