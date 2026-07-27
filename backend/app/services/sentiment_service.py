@@ -1,9 +1,12 @@
 import re
 import json
+import logging
 from groq import AsyncGroq
 from app.models.sentiment import SentimentRecord
 from app.repositories.sentiment_repository import SentimentRepository
 from app.core.config import get_settings
+
+logger = logging.getLogger(__name__)
 
 LABEL_MAP = {
     "positive": "positive",
@@ -19,6 +22,8 @@ SENTIMENT_INSTRUCTIONS = (
     "One object per headline in the same order as given.\n"
     'Each object must have exactly two keys: "label" (one of: positive, negative, neutral) '
     'and "score" (float 0.0-1.0 confidence).\n\n'
+    "Be decisive. Most financial headlines lean positive or negative rather than "
+    "perfectly neutral — reserve neutral only for headlines with no clear market implication.\n\n"
     'Example output format:\n'
     '[{"label": "positive", "score": 0.92}, {"label": "neutral", "score": 0.71}]\n\n'
     "Headlines:\n"
@@ -47,6 +52,7 @@ class SentimentService:
             results.append((label, score))
 
         if len(results) != count:
+            logger.warning(f"Groq returned {len(results)} items, expected {count}")
             return [("neutral", 0.5)] * count
 
         return results
@@ -61,14 +67,14 @@ class SentimentService:
                 model="llama-3.1-8b-instant",
                 messages=[{"role": "user", "content": prompt}],
                 max_tokens=1024,
-                temperature=0.0,
+                temperature=0.3,        #temperature adjusted from 0.0 which made it too safe and always pick neutral option.
             )
             raw = response.choices[0].message.content.strip()
+            logger.info(f"Groq raw response: {raw[:500]}")  #for debugging purposes
             return self._parse_response(raw, len(texts))
 
         except Exception as e:
-            import logging
-            logging.getLogger(__name__).error(f"Groq sentiment call failed: {e}")
+            logger.error(f"Groq sentiment call failed: {e}")
             return [("neutral", 0.5)] * len(texts)
 
     async def analyse_batch(self, posts: list[dict]) -> list[SentimentRecord]:
