@@ -29,6 +29,10 @@ SENTIMENT_INSTRUCTIONS = (
     "Headlines:\n"
 )
 
+OBJECT_PATTERN = re.compile(
+    r'\{\s*"label"\s*:\s*"(\w+)"\s*,\s*"score"\s*:\s*([\d.]+)\s*\}'
+)
+
 
 class SentimentService:
     def __init__(self, repository: SentimentRepository):
@@ -38,24 +42,45 @@ class SentimentService:
     def _parse_response(self, raw: str, count: int) -> list[tuple[str, float]]:
         cleaned = re.sub(r"```(?:json)?", "", raw).strip().strip("`").strip()
 
-        start = cleaned.find("[")
-        end   = cleaned.rfind("]")
-        if start != -1 and end != -1 and end > start:
-            cleaned = cleaned[start:end + 1]
+        try:
+            start = cleaned.find("[")
+            end   = cleaned.rfind("]")
+            if start != -1 and end != -1 and end > start:
+                candidate = cleaned[start:end + 1]
+                data = json.loads(candidate)
 
-        data = json.loads(cleaned)
+                results = []
+                for item in data:
+                    label = LABEL_MAP.get(str(item.get("label", "")).lower(), "neutral")
+                    score = round(float(item.get("score", 0.5)), 4)
+                    results.append((label, score))
 
-        results = []
-        for item in data:
-            label = LABEL_MAP.get(str(item.get("label", "")).lower(), "neutral")
-            score = round(float(item.get("score", 0.5)), 4)
-            results.append((label, score))
+                if len(results) == count:
+                    return results
 
-        if len(results) != count:
-            logger.warning(f"Groq returned {len(results)} items, expected {count}")
-            return [("neutral", 0.5)] * count
+                logger.warning(f"Full-array parse gave {len(results)} items, expected {count}. Falling back to regex extraction.")
 
-        return results
+        except (json.JSONDecodeError, ValueError, TypeError) as e:
+            logger.warning(f"Full-array JSON parse failed ({e}). Falling back to regex extraction.")
+
+        matches = OBJECT_PATTERN.findall(cleaned)
+        if matches:
+            results = []
+            for label_raw, score_raw in matches:
+                label = LABEL_MAP.get(label_raw.lower(), "neutral")
+                score = round(float(score_raw), 4)
+                results.append((label, score))
+
+            if len(results) == count:
+                return results
+
+            logger.warning(f"Regex extraction gave {len(results)} items, expected {count}. Padding/truncating.")
+            if len(results) > count:
+                return results[:count]
+            return results + [("neutral", 0.5)] * (count - len(results))
+
+        logger.error("Both full-array and regex parsing failed. Returning neutral fallback for entire batch.")
+        return [("neutral", 0.5)] * count
 
     async def _call_api(self, texts: list[str]) -> list[tuple[str, float]]:
         client    = AsyncGroq(api_key=self._settings.GROQ_API_KEY)
@@ -66,11 +91,14 @@ class SentimentService:
             response = await client.chat.completions.create(
                 model="llama-3.1-8b-instant",
                 messages=[{"role": "user", "content": prompt}],
-                max_tokens=1024,
-                temperature=0.3,        #temperature adjusted from 0.0 which made it too safe and always pick neutral option.
+                max_tokens=2048, #increased from 1024 tokens
+                #Too low tokens lead to truncation risk , turns into compromised JSON and neutral fallback
+                #too high lead to faster quota consumption, quicker rate limit adn neutral fallback 
+
+                temperature=0.3,
             )
             raw = response.choices[0].message.content.strip()
-            logger.info(f"Groq raw response: {raw[:500]}")  #for debugging purposes
+            logger.info(f"Groq raw response ({len(raw)} chars): {raw[:800]}")
             return self._parse_response(raw, len(texts))
 
         except Exception as e:
