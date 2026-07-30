@@ -3,15 +3,6 @@ function stripHtml(html) {
   return html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim()
 }
 
-function timeAgo(isoString) {
-  if (!isoString) return ""
-  const seconds = Math.floor((new Date() - new Date(isoString)) / 1000)
-  if (seconds < 60)    return `${seconds}s ago`
-  if (seconds < 3600)  return `${Math.floor(seconds / 60)}m ago`
-  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`
-  return `${Math.floor(seconds / 86400)}d ago`
-}
-
 const LABEL_COLOR = {
   positive: "var(--buy)",
   negative: "var(--sell)",
@@ -41,6 +32,8 @@ function FeedList({ feed, loading }) {
         const label = record.label ?? "neutral"
         const score = ((record.score ?? 0) * 100).toFixed(0)
         const color = LABEL_COLOR[label] ?? LABEL_COLOR.neutral
+        const text  = stripHtml(record.raw_text)
+        const hasUrl = Boolean(record.url)
 
         return (
           <div key={record.id} className="feed-item">
@@ -49,9 +42,12 @@ function FeedList({ feed, loading }) {
                 {label.charAt(0).toUpperCase() + label.slice(1)}
                 <span className="feed-item__score"> — {score}%</span>
               </span>
-              <span className="feed-item__time">{timeAgo(record.created_at)}</span>
             </div>
-            <p className="feed-item__text">{stripHtml(record.raw_text)}</p>
+            {hasUrl ? (
+              <a className="feed-item__text feed-item__link" href={record.url} target="_blank" rel="noopener noreferrer">{text}</a>
+            ) : (
+              <p className="feed-item__text">{text}</p>
+            )}
           </div>
         )
       })}

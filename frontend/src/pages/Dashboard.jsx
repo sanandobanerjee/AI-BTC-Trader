@@ -213,7 +213,7 @@ async function handleExplain() {
         <div className="col-right">
           <div className="feed-panel">
             <div className="feed-panel__header">
-              <span className="panel__title">Data Sources</span>
+              <span className="panel__title">Sentiment Headlines</span>
               <div className="feed-panel__live">
                 <span className="feed-panel__live-dot" />
                 Live

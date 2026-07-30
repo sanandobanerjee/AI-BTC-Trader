@@ -1,3 +1,4 @@
+import re
 import asyncio
 import time
 import httpx
@@ -18,8 +19,14 @@ PRICE_RETRIES      = 2
 PRICE_RETRY_WAIT   = 20
 CACHE_TTL_SECONDS  = 90
 
+HTML_TAG_PATTERN = re.compile(r"<[^>]*>")
+
 
 class RSSNewsClient:
+
+    def _clean_text(self, raw: str) -> str:
+        no_tags = HTML_TAG_PATTERN.sub(" ", raw)
+        return re.sub(r"\s+", " ", no_tags).strip()
 
     def get_btc_posts(self, limit: int = 25) -> list[dict]:
         results  = []
@@ -29,12 +36,13 @@ class RSSNewsClient:
             try:
                 feed = feedparser.parse(feed_url)
                 for entry in feed.entries[:per_feed]:
-                    title   = entry.get("title",   "").strip()
-                    summary = entry.get("summary", "").strip()
+                    title   = self._clean_text(entry.get("title", ""))
+                    summary = self._clean_text(entry.get("summary", ""))
+                    link    = entry.get("link", "").strip()
                     if not title:
                         continue
                     text = f"{title}. {summary[:150]}".strip()
-                    results.append({"text": text, "source": "rss"})
+                    results.append({"text": text, "source": "rss", "url": link})
             except Exception:
                 continue
 

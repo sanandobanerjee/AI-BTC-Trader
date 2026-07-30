@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from datetime import datetime, timezone
-from typing import Literal
+from typing import Literal, Optional
 from bson import ObjectId
 
 
@@ -10,6 +10,7 @@ class SentimentRecord(BaseModel):
     raw_text: str
     score: float
     label: Literal["positive", "negative", "neutral"]
+    url: Optional[str] = None
     created_at: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc)
     )

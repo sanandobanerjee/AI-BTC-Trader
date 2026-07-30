@@ -91,10 +91,7 @@ class SentimentService:
             response = await client.chat.completions.create(
                 model="llama-3.1-8b-instant",
                 messages=[{"role": "user", "content": prompt}],
-                max_tokens=2048, #increased from 1024 tokens
-                #Too low tokens lead to truncation risk , turns into compromised JSON and neutral fallback
-                #too high lead to faster quota consumption, quicker rate limit adn neutral fallback 
-
+                max_tokens=2048,
                 temperature=0.3,
             )
             raw = response.choices[0].message.content.strip()
@@ -116,13 +113,14 @@ class SentimentService:
                 raw_text=post["text"],
                 score=score,
                 label=label,
+                url=post.get("url"),
             )
             await self.repository.insert(record)
             records.append(record)
 
         return records
 
-    async def analyse_and_store(self, text: str, source: str) -> SentimentRecord:
+    async def analyse_and_store(self, text: str, source: str, url: str | None = None) -> SentimentRecord:
         results      = await self._call_api([text])
         label, score = results[0]
         record = SentimentRecord(
@@ -130,6 +128,7 @@ class SentimentService:
             raw_text=text,
             score=score,
             label=label,
+            url=url,
         )
         await self.repository.insert(record)
         return record
