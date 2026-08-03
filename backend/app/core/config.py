@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     HUGGINGFACE_API_KEY: str 
     FRONTEND_URL: str="http://localhost:5173"
     SENTIMENT_TTL_DAYS:int=45
-    SIGNAL_TTL_DAYS:int=12
+    SIGNAL_TTL_BUFFER_HOURS:int=12
 
     model_config = SettingsConfigDict(
         env_file=".env",
