@@ -1,10 +1,10 @@
 <div align="center">
 
-# ◈ $aturn
+# ◈ $aturn ◈ 
 
 ### Sentiment-driven AI Trading & Unified Recommendation Network
 
-*Real-time Bitcoin intelligence powered by FinBERT, Groq, and a live RSS pipeline*
+*Real-time Bitcoin intelligence powered by Groq, RSS ingestion, and BTC price tracking*
 
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.135-009688?style=flat-square&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
 [![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black)](https://react.dev)
@@ -16,7 +16,7 @@
 
 <br>
 
-Saturn is a full-stack Bitcoin intelligence platform that turns live crypto news into actionable trading signals. It ingests headlines from multiple RSS feeds, scores each one using FinBERT, aggregates the sentiment into a BUY / SELL / HOLD recommendation with a confidence score, and displays everything in a real-time terminal-style dashboard. A streaming AI layer powered by Groq also explains the current signal in plain English.
+Saturn is a full-stack Bitcoin intelligence platform that turns live crypto news into actionable trading signals. It ingests headlines from multiple RSS feeds, classifies them with a Groq-powered sentiment model, aggregates the results into a BUY / SELL / HOLD recommendation with a confidence score and sample breakdown, and displays everything in a React dashboard. The backend also runs a recurring pipeline every 10 minutes to refresh signals, collect recent BTC price history, and stream a plain-English AI explanation of the latest recommendation.
 
 <br>
 
@@ -36,10 +36,11 @@ Saturn is a full-stack Bitcoin intelligence platform that turns live crypto news
 
 ## Features
 
-- **Live sentiment pipeline** — RSS feeds are ingested on a recurring schedule via APScheduler
-- **FinBERT scoring** — financial-domain sentiment analysis through Hugging Face Inference API
-- **Signal engine** — aggregates positive, neutral, and negative counts into a BUY / SELL / HOLD signal with confidence
-- **Real-time dashboard** — a three-column terminal UI for signal status, price movement, and live feed data
+- **Live sentiment pipeline** — RSS feeds are ingested on a recurring schedule via APScheduler, with the pipeline refreshing every 10 minutes
+- **Groq-powered sentiment scoring** — headlines are classified with a Groq LLM and stored as sentiment records with confidence scores
+- **Signal engine** — aggregates positive, neutral, and negative counts into a BUY / SELL / HOLD signal with confidence and sample breakdown
+- **Live BTC price tracking** — price snapshots and recent history are fetched from CoinGecko and shown in the dashboard
+- **React dashboard** — a live UI for signal status, price movement, recent headlines, and AI analysis
 - **Streaming AI analysis** — the `/ai/explain` endpoint streams a Groq-powered market explanation in real time
 - **MCP server** — stdio-based integration for Claude Desktop and other MCP-compatible agents
 
@@ -57,13 +58,13 @@ Saturn is a full-stack Bitcoin intelligence platform that turns live crypto news
 
 ## Architecture
 
-Saturn is built using the SOLID principles as a guideline. All the ideas provided in the SOLID framework are implemented as cleanly as possible.
+Saturn is built using the SOLID principles as a guideline. Recent changes added a scheduled background job for recurring updates, a dedicated price-history layer, and a streaming AI explanation endpoint while keeping the backend modular and easier to extend.
 The app is constructed as a modular pipeline that moves from ingestion to insight:
 
 1. RSS feeds are collected and normalized into article-like payloads.
-2. Each article is scored by FinBERT for sentiment polarity and confidence.
+2. Each article is classified by a Groq-based sentiment model for label and confidence.
 3. The backend aggregates the results into a structured trading signal.
-4. The frontend renders the signal, price insight, and live feed in a terminal-inspired dashboard.
+4. The frontend renders the signal, price insight, and recent news feed in a React dashboard.
 5. A streaming AI endpoint explains the active signal in natural language.
 
 ### Architecture Diagram
@@ -95,11 +96,12 @@ Saturn exposes two AI-powered interfaces over the same data layer:
 
 - **Framework** — FastAPI (async)
 - **Database** — MongoDB Atlas via Motor
-- **Sentiment model** — FinBERT via Hugging Face Inference API
-- **Scheduling** — APScheduler
+- **Sentiment model** — Groq API with Llama 3.1 8B Instant
+- **Scheduling** — APScheduler for recurring ingestion and signal refreshes
 - **Feed parsing** — feedparser
+- **Price data** — CoinGecko API for BTC price snapshots and history
 - **HTTP client** — httpx
-- **AI explanation** — Groq API with Llama 3.1 8B Instant
+- **AI explanation** — Groq API streaming responses
 - **Agent protocol** — MCP (stdio)
 - **Language** — Python 3.13
 
@@ -122,6 +124,8 @@ Saturn exposes two AI-powered interfaces over the same data layer:
 Saturn-AI/
 ├── backend/
 │   ├── app/
+│   │   ├── api/
+│   │   │   └── routes/
 │   │   ├── core/
 │   │   ├── mcp/
 │   │   ├── models/
@@ -130,6 +134,7 @@ Saturn-AI/
 │   │   ├── services/
 │   │   └── main.py
 │   ├── scheduler/
+│   │   └── jobs.py
 │   ├── tests/
 │   ├── requirements.txt
 │   └── .env.example
@@ -226,8 +231,10 @@ npm run dev
 
 | Method | Endpoint | Description |
 |---|---|---|
+| GET | `/health` | Backend health check |
 | GET | `/sentiment/latest` | Latest sentiment record |
 | GET | `/sentiment/feed?limit=25` | Paginated sentiment feed |
+| GET | `/sentiment/feed/{source}` | Sentiment feed filtered by source |
 | GET | `/signals/current` | Current BUY / SELL / HOLD signal |
 | GET | `/signals/history` | Signal history |
 | GET | `/price/btc` | Current BTC price, 24h change, and market cap |
@@ -245,8 +252,12 @@ All configuration is handled through environment variables in the backend:
 MONGODB_URI=mongodb+srv://user:password@cluster.mongodb.net/
 MONGODB_DB_NAME=btc_sentiment
 GROQ_API_KEY=your_groq_api_key
+HUGGINGFACE_API_KEY=your_huggingface_key
 COINGECKO_BASE_URL=https://api.coingecko.com/api/v3
 FRONTEND_URL=http://localhost:5173
+CORS_ALLOW_ALL=false
+SENTIMENT_TTL_DAYS=45
+SIGNAL_TTL_BUFFER_HOURS=12
 ```
 
 ---
@@ -262,12 +273,14 @@ pytest tests/
 
 ## Roadmap
 
-A list of ideas which can be implemented after deployment:
+Features which are coming soon:
 
--> Integrating other cryptocurrency markets
--> Higher source transparency
--> Integrating the Indian Stock market
--> Higher information ingestion for better results
+1. Signal outcome tracking / backtesting loop 
+2. Tests 
+3. Multi-asset support (ETH, SOL)
+4. Structured logging 
+5. Historical signal browsing UI
+6. Email alerting on signal change
 
 ---
 

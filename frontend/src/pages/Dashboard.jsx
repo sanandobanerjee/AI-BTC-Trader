@@ -85,7 +85,7 @@ async function handleExplain() {
       {/* ── Header ── */}
       <header className="header">
         <div className="header__brand">
-          <h1 className="header__title">Saturn</h1>
+          <h1 className="header__title">$aturn</h1>
           <span className="header__subtitle">
             Sentiment-driven AI Trading &amp; Unified Recommendation Network
           </span>
