@@ -38,7 +38,7 @@ BREAKDOWN: {signal.positive_count} positive, {signal.negative_count} negative, {
 RECENT HEADLINES:
 {feed_summary}
 
-Explain in under 200 words: why the signal is {signal.signal}, what headlines are driving it(mention notable positive, neutral and negative news and how they overlap each other to yield the final answer), and any notable source patterns."""
+Explain in under 150 words: why the signal is {signal.signal}, what headlines are driving it(mention notable positive, neutral and negative news and how they overlap each other to yield the final answer), and any notable source patterns."""
 
     async def stream_response():
         try:
