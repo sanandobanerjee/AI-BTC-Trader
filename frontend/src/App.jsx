@@ -34,7 +34,7 @@ function App() {
   if (waking) {
     return (
       <div className="wake-screen">
-        <span className="wake-screen__title">Saturn</span>
+        <span className="wake-screen__title">$aturn</span>
         <span className="wake-screen__msg">Waking up backend — this takes ~30s on first load</span>
         <span className="wake-screen__dot-row">
           <span className="wake-screen__dot" />
