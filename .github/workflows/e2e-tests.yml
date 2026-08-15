@@ -3,17 +3,17 @@ name: E2E Tests
 on:
   workflow_dispatch:
   schedule:
-    -cron :"0 6 * * *"
+    - cron: "0 6 * * *"
 
 jobs:
   playwright:
     runs-on: ubuntu-latest
-    defaults: 
+    defaults:
       run:
-        workflow_directory: frontend
+        working-directory: frontend
 
     steps:
-      - name:Checkout code
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Set up Node
