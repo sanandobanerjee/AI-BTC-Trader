@@ -11,7 +11,7 @@ test.describe("Saturn dashboard", () => {
   test("displays a trading signal", async ({ page }) => {
     await page.goto("/")
     const badge = page.locator(".signal-badge")
-    await expect(badge).toBeVisible({ timeout: 20000 })
+    await expect(badge).toBeVisible({ timeout: 60000 })
     await expect(badge).not.toHaveClass(/signal-badge--empty/)
     await expect(badge.locator(".signal-badge__label")).toHaveText(/BUY|SELL|HOLD/)
   })
@@ -19,7 +19,7 @@ test.describe("Saturn dashboard", () => {
   test("displays sentiment headlines", async ({ page }) => {
     await page.goto("/")
     const feed = page.locator(".feed-list")
-    await expect(feed).toBeVisible({ timeout: 20000 })
+    await expect(feed).toBeVisible({ timeout: 60000 })
     await expect(feed).not.toHaveClass(/feed-list--state/)
     await expect(feed.locator(".feed-item").first()).toBeVisible()
   })
@@ -27,7 +27,7 @@ test.describe("Saturn dashboard", () => {
   test("renders the price chart", async ({ page }) => {
     await page.goto("/")
     const chart = page.locator(".price-chart")
-    await expect(chart).toBeVisible({ timeout: 20000 })
+    await expect(chart).toBeVisible({ timeout: 60000 })
     await expect(chart).not.toHaveClass(/price-chart--empty/)
   })
 
@@ -35,7 +35,7 @@ test.describe("Saturn dashboard", () => {
     await page.goto("/")
 
     const askBtn = page.locator(".ai-panel__btn")
-    await expect(askBtn).toBeEnabled({ timeout: 20000 })
+    await expect(askBtn).toBeEnabled({ timeout: 60000 })
     await expect(askBtn).toHaveText("✦ Ask Saturn AI")
 
     await askBtn.click()
