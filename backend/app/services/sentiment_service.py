@@ -89,10 +89,11 @@ class SentimentService:
 
         try:
             response = await client.chat.completions.create(
-                model="llama-3.1-8b-instant",
+                model="openai/gpt-oss-20b",
                 messages=[{"role": "user", "content": prompt}],
-                max_tokens=2048,
+                max_tokens=3072,
                 temperature=0.3,
+                reasoning_effort="low",
             )
             raw = response.choices[0].message.content.strip()
             logger.info(f"Groq raw response ({len(raw)} chars): {raw[:800]}")

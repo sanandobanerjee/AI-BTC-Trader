@@ -43,10 +43,11 @@ Explain in under 150 words: why the signal is {signal.signal}, what headlines ar
     async def stream_response():
         try:
             stream = await client.chat.completions.create(
-                model="llama-3.1-8b-instant",
+                model="openai/gpt-oss-20b",
                 messages=[{"role": "user", "content": prompt}],
                 stream=True,
-                max_tokens=300,
+                max_tokens=400,
+                reasoning_effort="low",
             )
             async for chunk in stream:
                 text = chunk.choices[0].delta.content

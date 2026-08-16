@@ -1,3 +1,5 @@
+[![E2E Tests](https://github.com/sanandobanerjee/Saturn-AI/actions/workflows/e2e-tests.yml/badge.svg)](https://github.com/sanandobanerjee/Saturn-AI/actions/workflows/e2e-tests.yml)
+
 <div align="center">
 
 # ◈ $aturn ◈ 
@@ -43,6 +45,8 @@ Saturn is a full-stack Bitcoin intelligence platform that turns live crypto news
 - **React dashboard** — a live UI for signal status, price movement, recent headlines, and AI analysis
 - **Streaming AI analysis** — the `/ai/explain` endpoint streams a Groq-powered market explanation in real time
 - **MCP server** — stdio-based integration for Claude Desktop and other MCP-compatible agents
+- **Playwright E2E testing** — automated end-to-end tests for the React dashboard with Playwright
+- **GitHub Actions CI/CD** — automated E2E test pipeline that runs on every push to ensure code quality
 
 ---
 
@@ -96,7 +100,7 @@ Saturn exposes two AI-powered interfaces over the same data layer:
 
 - **Framework** — FastAPI (async)
 - **Database** — MongoDB Atlas via Motor
-- **Sentiment model** — Groq API with Llama 3.1 8B Instant
+- **Sentiment model** — Groq API with OpenAI OSS 20B
 - **Scheduling** — APScheduler for recurring ingestion and signal refreshes
 - **Feed parsing** — feedparser
 - **Price data** — CoinGecko API for BTC price snapshots and history
@@ -276,7 +280,7 @@ pytest tests/
 Features which are coming soon:
 
 1. Signal outcome tracking / backtesting loop 
-2. Tests 
+2. Backend tests using pytest
 3. Multi-asset support (ETH, SOL)
 4. Structured logging 
 5. Historical signal browsing UI
